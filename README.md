@@ -1,4 +1,4 @@
-PThreads Examples
+Pthreads Examples
 ==============
 Source: http://www.amazon.com/PThreads-Programming-Standard-Multiprocessing-Nutshell/dp/1565921151
 
@@ -34,6 +34,7 @@ for (int i = 0; i < 4; i++) {
     // do somework
 }
 printf("job %d finished\n", counter);
+pthread_mutex_unlock(&mutex);
 ```
 
 Without the mutex lock the output can look like the following:
