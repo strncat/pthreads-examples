@@ -1,4 +1,4 @@
-PThreads Examples
+Pthreads Examples
 ==============
 Source: http://www.amazon.com/PThreads-Programming-Standard-Multiprocessing-Nutshell/dp/1565921151
 
