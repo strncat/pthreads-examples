@@ -1,9 +1,7 @@
 //
-//  main.c
-//  pthreads-examples
 //
-//  Created by Fatima B on 12/10/15.
-//  Copyright © 2015 Fatima B. All rights reserved.
+//  pthreads-examples using pthread_create and pthread_join
+//  threads shared data, code, heap but not stack and registers
 //
 
 #include <stdlib.h>
@@ -55,8 +53,9 @@ int main(int argc, const char * argv[]) {
                    (void *) do_another_thing,
                    (void *) &r2);
 
-    pthread_join(thread1, NULL);
-    pthread_join(thread2, NULL);
+    // without waiting, one output was: wrap up: one thing 0, another 0,  ...
+    pthread_join(thread1, NULL); // the parent will wait until thread 1 is done
+    pthread_join(thread2, NULL); // the parent will wait until thread 2 is done
 
     do_wrap_up(r1, r2);
 
