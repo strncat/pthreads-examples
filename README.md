@@ -17,6 +17,7 @@ for (int i = 0; i < 4; i++) {
     // do somework
 }
 printf("job %d finished\n", counter);
+pthread_mutex_unlock(&mutex);
 ```
 
 Without the mutex lock the output can look like the following:
