@@ -1,7 +1,18 @@
 //
 //
-// Simple Producer - Consumer Model
+// Simple Producer - Consumer Model / using condition variables
 //
+// A condition variable is used to avoid busy waiting.
+// It is an explicit queue that threads can put themselves on when some state of
+// execution (i.e., some condition) is not as desired (by waiting on the condition)
+//
+// A call to pthread_cond_wait requires that a locked mutex be passed in along with
+// the condition variable. The system releases the mutex on the caller’s behalf when
+// the wait for the condition begins.
+
+// the thread that issues the pthread_cond_signal or pthread_cond_broadcast call holds
+// the mutex at the time of the call but must release it after the call. Then,
+// when the system wakes it up, a waiting thread can regain control of the mutex.
 //
 
 #include <stdio.h>

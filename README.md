@@ -45,6 +45,41 @@ job 2 finished
 * The pipeline model: we have a long stream of input and we have threads to work on each stage of the pipeline, data will be passed from a stage to another
 
 
+##### Condition Variables #####
+* A condition variable is used to avoid busy waiting. It is an explicit queue that threads can put themselves on when waiting on a condition. "While a mutex lets threads synchronize by controlling their access to data, a condition variable lets threads synchronize on the value of data."
+
+related example: example4-producer-consumer.c
+
+consumer waits until the buffer isn't empty using a condition variable:
+``` 
+pthread_mutex_lock(&mutex);
+while (buffer == 0) {
+    pthread_cond_wait(&condition_c_, &mutex); // make consumer wait
+}
+// do some work
+pthread_cond_signal(&condition_p);
+pthread_mutex_unlock(&mutex);
+```
+
+producer waits until the buffer is empty to add more data:
+```
+pthread_mutex_lock(&mutex);
+while (buffer != 0) {
+    pthread_cond_wait(&condition_p, &mutex); // make producer wait
+}
+// do some work
+pthread_cond_signal(&condition_c); // wake up consumer
+pthread_mutex_unlock(&mutex);
+}
+```
+
+* A call to pthread_cond_wait requires that a locked mutex be passed in along with the condition variable. The system releases the mutex on the caller’s behalf when the wait for the condition begins.
+
+* the thread that issues the pthread_cond_signal or pthread_cond_broadcast call holds the mutex at the time of the call but must release it after the call. Then, when the system wakes it up, a waiting thread can regain control of the mutex.
+
+* pthread_cond_broadcast awakens all threads while pthread_cond_signal awakens one thread. If all threads were awaken in the first case, the system still will select one thread to give back the mutex lock to. The other threads are moved to the queue of threads that are waiting to acquire the mutex. 😱
+
+
 ##### Buffering Data Between Threads #####
 * Producer Consumer Model:
  * buffer: any data structure accessible to both the producer and the consumer
@@ -53,35 +88,3 @@ job 2 finished
  * state information: a state to indicate how much data is in the buffer
 
 related example: example4-producer-consumer.c
-Producer model:
-```
-void* producer(void *ptr) {
-    for (int i = 1; i <= 10; i++) {
-        pthread_mutex_lock(&mutex);
-        while (buffer != 0) {
-            pthread_cond_wait(&condition_p, &mutex); // make producer wait
-        }
-        buffer = i; // add a value to buffer
-        printf("produced %d\n", buffer);
-        pthread_cond_signal(&condition_c); // wake up consumer
-        pthread_mutex_unlock(&mutex);
-    }
-    pthread_exit(0);
-}
-```
-Consumer model:
-```
-void* consumer(void *ptr) {
-    for (int i = 1; i <= 10; i++) {
-        pthread_mutex_lock(&mutex);
-        while (buffer == 0) {
-            pthread_cond_wait(&condition_c, &mutex); // make consumer wait
-        }
-        printf("consumed %d\n", buffer);
-        buffer = 0; // consumer the value
-        pthread_cond_signal(&condition_p); // wake up producer
-        pthread_mutex_unlock(&mutex);
-    }
-    pthread_exit(0);
-}
-```
